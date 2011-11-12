@@ -2,69 +2,122 @@
 
 ListGraph::ListGraph()
 {
-	nb_nodes = 0;
-	nb_arcs = 0;
+	current_node_id = 1;
+	current_arc_id = 1;
+	nodes_nb = 0;
+	arcs_nb = 0;
 }
 
-Node* ListGraph::add_node ()  //O(1)
+ListGraph::~ListGraph() //O(n+m)
 {
-	listNodes.push_back(Node(this));
-	std::list<Node>::iterator it = listNodes.end();
-	Node* n = &(*it);
-	n->it = it;
-	return n;
+	listNodes.clear();
+	listArcs.clear();
 }
 
-void ListGraph::delete_node (Node* n) // pb: O(n*m) != O(m)
+unsigned int ListGraph::add_node () //O(1)
 {
-	for(std::list<Node>::iterator it=listNodes.begin();it!=listNodes.end();it++)
+	unsigned tempId = get_next_node_id ();
+	listNodes.at(tempId) = Node(tempId);
+	
+	nodes_nb++;
+	
+	return tempId;
+}
+
+void ListGraph::delete_node (unsigned Nid) 
+{	
+	listNodes.erase(listNodes.begin() + Nid);
+	for(std::vector<Arc>::iterator it= listArcs.begin();it!=listArcs.end();it++)
 	{
-		for(std::list<Node*>::iterator it2=(*it).successors.begin();it2!=(*it).successors.end();it2++)
-		{
-			if(*it2==n)
-				(*it).successors.erase(it2);
-		}
-		listNodes.erase(n->it);
+		if(get_node((*it).from)->id == Nid)
+			get_node((*it).from)->successors.erase((*it).itFrom);
 	}
+	
+	nodes_nb--;	
 }
 
-NodeArc ListGraph::add_arc (Node* from, Node* to) //O(1)
+unsigned int ListGraph::add_arc (unsigned NidFrom, unsigned NidTo) //O(1) ok
 {
-	from->successors.push_back(to);
-	return NodeArc(from,to,from->successors.end());
+	unsigned tempId = get_next_arc_id ();
+	get_node(NidFrom)->successors.push_back(NidTo);
+	listArcs.at(current_arc_id) = Arc(tempId,NidFrom,NidTo);
+	
+	arcs_nb++;
+	
+	return tempId;
 }
 
-void ListGraph::remove_arc (NodeArc* a) //O(1)
+void ListGraph::remove_arc (unsigned Aid) //O(1) ok
 {
-	a->to->successors.erase(a->it);
+	get_node(get_arc(Aid)->from)->successors.erase(get_arc(Aid)->itFrom);
+	listArcs.erase(listArcs.begin() + Aid);
+
+	arcs_nb--;
 }
 
-std::list<Node*> ListGraph::getSuccessors(Node* from) //O(1)
+std::list<unsigned> ListGraph::list_successors (unsigned Nid) //O(1) ok
 {
-	return from->successors;
+	return listNodes.at(Nid).successors;
 }
 
-std::list<NodeArc> ListGraph::getArcsFrom(Node* from) //O(m)
+std::list<unsigned> ListGraph::list_ancestors (unsigned Nid)
 {
-	std::list<NodeArc> lA;
-	for(std::list<Node*>::iterator it=from->successors.begin(); it!=from->successors.end();it++)
+	std::list<unsigned> r;
+	for(std::vector<Arc>::iterator it= listArcs.begin();it!=listArcs.end();it++)
 	{
-		lA.push_back(NodeArc(from, (*it),it));
+		//TODO: check if it's (*it).from instead of (*it).to
+		if((*it).from==Nid)
+			r.push_back((*it).from);
+	}
+	return r;
+}
+
+std::list<unsigned> ListGraph::list_arcs_from (unsigned Nid) //O(m)
+{
+	std::list<unsigned> lA;
+	for(std::vector<Arc>::iterator it= listArcs.begin();it!=listArcs.end();it++)
+	{
+		if((*it).from==Nid)
+			lA.push_back((*it).id);
 	}
 	return lA;
 }
 
-std::list<NodeArc> ListGraph::getArcsTo(Node* to) 
+std::list<unsigned> ListGraph::list_arcs_to (unsigned Nid) //O(m)
 {
-	std::list<NodeArc> lA;
-	for(std::list<Node>::iterator it=listNodes.begin(); it!=listNodes.end();it++)
+	std::list<unsigned> lA;
+	for(std::vector<Arc>::iterator it= listArcs.begin();it!=listArcs.end();it++)
 	{
-		for(std::list<Node*>::iterator it2=(*it).successors.begin();it2!=(*it).successors.end();it2++)
-		{
-			
-		}
+		if((*it).to==Nid)
+			lA.push_back((*it).id);
 	}
 	return lA;
+}
+
+unsigned int ListGraph::node_count () //O(1)
+{
+	return nodes_nb;
+}
+
+unsigned int ListGraph::arcs_count () //O(1)
+{
+	return arcs_nb;
 }
 
 //======================================================================
+
+//~ std::vector<Node>::iterator ListGraph::getNodeIteratorById(unsigned int i)
+//~ {
+	//~ bool found = false;
+	//~ std::vector<Node>::iterator it = listNodes.begin();
+	//~ 
+	//~ while(found == false && it!=listNodes.end())
+	//~ {
+		//~ if(it->id == i)
+			//~ found = true;
+		//~ it++;
+	//~ }
+	//~ if(found==true)
+		//~ return it;
+//~ }
+//~ 

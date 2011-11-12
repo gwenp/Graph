@@ -5,9 +5,27 @@
 #include <vector>
 #include "../graph.hh"
 
-class Node;
-class NodeArc;
+//TODO : MAKE THEM PRIVATE!
 
+
+class Node
+{
+	public:
+		Node( unsigned i ){id=i;};
+
+		std::list<unsigned> successors;
+		unsigned id;
+};
+
+class Arc
+{
+	public:
+		Arc(unsigned Aid, unsigned fromNode, unsigned toNode){id = Aid; from=fromNode;to=toNode;};
+		unsigned id; 
+		unsigned from; //ancestor
+		unsigned to;   //successor
+		std::list<unsigned>::iterator itFrom;
+};
 
 //----------------------------------------------------------------------
 		
@@ -15,45 +33,31 @@ class ListGraph
 {
 	public:
 		ListGraph();
-		virtual Node* add_node () ; 						//	O(1)
-		virtual void delete_node (Node* n) ;									//	O(n*m)
-		virtual NodeArc add_arc (Node* from, Node* to) ;						//	O(1)
-		virtual void remove_arc (NodeArc* a) ;									//	O(1)
+		~ListGraph();
+		virtual unsigned add_node () ;
+		virtual void delete_node (unsigned Nid) ;
+		virtual unsigned add_arc (unsigned NidFrom, unsigned NidTo) ;
+		virtual void remove_arc (unsigned Aid) ;
+		virtual std::list<unsigned> list_successors (unsigned Nid) ; // doit etre remplace par std::list<unsigned> list_successors (Node* n) ; 
+		virtual std::list<unsigned> list_ancestors (unsigned Nid) ; // doit etre remplace par std::list<unsigned> list_successors (Node* n) ; 
+		virtual std::list<unsigned> list_arcs_from (unsigned Nid) ;
+		virtual std::list<unsigned> list_arcs_to (unsigned Nid) ;
+		virtual unsigned int node_count () ;
+		virtual unsigned int arcs_count () ;
 
-		
-		std::list<Node*> getSuccessors(Node* from);
-		std::list<Node*> getPredecesseurs(Node* from); 	//TODO
-		
-		std::list<NodeArc> getArcsFrom(Node* from);
-		std::list<NodeArc> getArcsTo(Node* from);
-		
 	private:
-		std::vector<Node>::iterator getNodeIteratorById(unsigned int i);
 		
-		unsigned int nb_nodes;
-		unsigned int nb_arcs;
-		 
-		std::list<Node> listNodes;
-};
+		std::vector<Node> listNodes;
+		std::vector<Arc> listArcs;
 
-
-class NodeArc
-{
-	public :
-		NodeArc(Node* f,Node* t,std::list<Node*>::iterator iterator){to=t;from=f;it=iterator;}
-		Node* to;	
-		Node* from;	
-		std::list<Node*>::iterator it;	
-	private:
-};
-
-class Node
-{
-	public:
-		Node(ListGraph* l){ };
-
-		std::list<Node*> successors;
-		std::list<Node>::iterator it;
+		unsigned int get_next_node_id()		{ return current_node_id++; };
+		Node* get_node(unsigned Nid)		{ return &listNodes.at(Nid); };
+		Arc* get_arc(unsigned Aid)			{ return &listArcs.at(Aid); };
+		unsigned current_node_id;
+		unsigned current_arc_id;
+		
+		unsigned nodes_nb;
+		unsigned arcs_nb;
 };
 
 #endif /* LISTGRAPH_HH */ 

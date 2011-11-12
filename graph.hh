@@ -1,9 +1,9 @@
 #ifndef __GRAPH_HH__
 #define __GRAPH_HH__
 
-#include <set>
+#include <list>
 
-using std::set;
+using std::list;
 
 class Graph
 {
@@ -12,12 +12,10 @@ public:
     virtual void delete_node (unsigned int id) = 0;
     virtual unsigned int add_arc (unsigned int from, unsigned int to) = 0;
     virtual void remove_arc (unsigned int id) = 0;
-    virtual set<unsigned int> list_successors (unsigned int id) = 0;
-    virtual set<unsigned int> list_ancestors (unsigned int id) = 0;
-    virtual set<unsigned int> list_nodes () = 0;
-    virtual set<unsigned int> list_arcs_from (unsigned int id) = 0;
-    virtual set<unsigned int> list_arcs_to (unsigned int id) = 0;
-    virtual set<unsigned int> list_arcs () = 0;
+    virtual std::list<unsigned int> list_successors (unsigned int id) = 0;
+    virtual std::list<unsigned int> list_ancestors (unsigned int id) = 0;
+    virtual std::list<unsigned int> list_arcs_from (unsigned int id) = 0;
+    virtual std::list<unsigned int> list_arcs_to (unsigned int id) = 0;
     virtual unsigned int node_count () = 0;
     virtual unsigned int arcs_count () = 0;
 private:
